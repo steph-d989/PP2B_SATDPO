@@ -269,10 +269,3 @@ Institución:
 
 **Instituto Continental**
 
-------------------------------------------------------------------------
-
-# 👩‍💻 Autora
-
-**Stephani Damiani Kaemena**
-
-Estudiante del programa de **Big Data / Ciencia de Datos**
