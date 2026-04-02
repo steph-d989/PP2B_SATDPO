@@ -127,17 +127,17 @@ Estado actual:
     │   └── docs/
     │
     ├── data/
-    │   ├── 1_dim_asesor.csv
-    │   ├── 2_fact_reclutamiento.csv
-    │   ├── 3_fact_rendimiento_mensual.csv
-    │   ├── 4_fact_capacitacion.csv
-    │   ├── 5_fact_calidad.csv
-    │   ├── 6_fact_incidencias.csv
-    │   ├── 7_fact_adherencia.csv
-    │   └── 8_fact_clima.csv
+    │   ├── 1_asesor.csv
+    │   ├── 2_reclutamiento.csv
+    │   ├── 3_rendimiento_mensual.csv
+    │   ├── 4_capacitacion.csv
+    │   ├── 5_calidad.csv
+    │   ├── 6_incidencias.csv
+    │   ├── 7_adherencia.csv
+    │   └── 8_clima.csv
     │
     ├── notebooks/
-    │   └── carga_bronza.ipynb
+    │   └── carga_bronze.ipynb
     │
     ├── venv_bda_idl2/
     │
@@ -169,18 +169,18 @@ operativo.
 
 El modelo analítico utilizará un **esquema en estrella**.
 
-                     dim_asesor
-                         │
-                         │
-     ┌───────────────────┼────────────────────┐
-     │                   │                    │
-    fact_rendimiento   fact_calidad     fact_capacitacion
-     │
-    fact_incidencias
-     │
-    fact_adherencia
-     │
-    fact_clima
+                         dim_asesor
+                             │
+                             │
+         ┌───────────────────┼────────────────────┐
+         │                   │                    │
+     rendimiento          calidad            capacitacion
+         │
+     incidencias
+         │
+     adherencia
+         │
+       clima
 
 Este modelo permitirá:
 
