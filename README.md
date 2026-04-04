@@ -2,262 +2,453 @@
 
 ## Sistema de Alerta Temprana de Desempeño del Personal Operativo
 
-Proyecto desarrollado para el curso **Big Data Aplicada** del
-**Instituto Continental**.
+Proyecto desarrollado para el curso **Big Data Aplicada** del **Instituto Continental**.
 
-El objetivo del proyecto es construir un **pipeline de datos** que
-permita analizar información relacionada con el desempeño del personal
-operativo y generar indicadores que faciliten la **detección temprana de
-problemas de rendimiento**.
+El proyecto tiene como finalidad implementar un **pipeline de datos** orientado al análisis del desempeño del personal operativo, permitiendo organizar, transformar y consolidar información relevante para detectar de manera temprana posibles problemas de rendimiento, clima laboral, adherencia, calidad, capacitación e incidencias.
 
-El sistema se basa en una **arquitectura moderna de datos tipo
-Medallion**, donde los datos se procesan progresivamente desde datos
-crudos hasta información analítica.
+La solución fue construida sobre una **arquitectura Medallion**, utilizando las capas **Bronze, Silver y Gold**, además de un esquema **Meta** para el control técnico de cargas y ejecución del pipeline.
 
-------------------------------------------------------------------------
+---
 
 # 🎯 Objetivo del proyecto
 
-Desarrollar un sistema que permita:
+Desarrollar una solución de datos que permita:
 
--   Integrar múltiples fuentes de datos operativos.
--   Construir un **pipeline de procesamiento de datos**.
--   Preparar información para **análisis de desempeño del personal**.
--   Crear una base para **sistemas de alerta temprana basados en
-    datos**.
+- Integrar múltiples fuentes de información operativa.
+- Construir un pipeline de procesamiento en varias capas.
+- Estandarizar y transformar datos para análisis.
+- Consolidar indicadores de desempeño del personal.
+- Generar una base analítica para sistemas de alerta temprana.
 
-------------------------------------------------------------------------
+---
 
-# 🏗 Arquitectura del Pipeline
+# 🏗 Arquitectura del proyecto
 
-El flujo de datos del proyecto sigue la siguiente arquitectura:
+El flujo de datos implementado sigue la siguiente lógica:
 
-    GitHub Repository
-            │
-            ▼
-    Python (Jupyter Notebook)
-            │
-            ▼
-    Carga de datos
-            │
-            ▼
-    Bronze Layer
-            │
-            ▼
-    Silver Layer (pendiente)
-            │
-            ▼
-    Gold Layer (pendiente)
-            │
-            ▼
-    Supabase Database
+```text
+Archivos fuente / datasets
+          │
+          ▼
+     Python / Notebook
+          │
+          ▼
+   PostgreSQL en Supabase
+          │
+          ▼
+     Bronze Layer
+          │
+          ▼
+      Meta Layer
+          │
+          ▼
+     Silver Layer
+          │
+          ▼
+      Gold Layer
+          │
+          ▼
+Modelo analítico final
+```
 
-Este enfoque permite:
+## Capas implementadas
 
--   mantener **trazabilidad de datos**
--   aplicar **transformaciones progresivas**
--   facilitar **análisis escalable**
+### 🥉 Bronze
+Contiene la información inicial cargada desde los archivos fuente hacia la base de datos.  
+En esta etapa se almacenan las tablas base del proyecto.
 
-------------------------------------------------------------------------
+### ⚙️ Meta
+Contiene metadatos técnicos para el control del pipeline, especialmente la configuración de cargas.
 
-# 🥉 Bronze Layer (Actual)
+### 🥈 Silver
+Contiene datos validados, estandarizados y preparados para el análisis.  
+Aquí se ejecutan procesos de transformación y carga desde Bronze.
 
-La capa **Bronze** contiene los **datos crudos** provenientes de los
-archivos fuente.
+### 🥇 Gold
+Contiene el modelo analítico final, estructurado mediante tablas de **dimensiones** y **hechos**, listo para consultas e indicadores.
 
-Características:
+---
 
--   Datos sin transformar
--   Estructura original
--   Base del pipeline de datos
+# 🧩 Estructura de datos del proyecto
 
-Actualmente esta capa se trabaja mediante el notebook:
+El proyecto trabaja con 8 entidades principales relacionadas con el desempeño del personal operativo:
 
-    notebooks/carga_bronza.ipynb
+- `asesor`
+- `reclutamiento`
+- `rendimiento_mensual`
+- `capacitacion`
+- `calidad`
+- `incidencias`
+- `adherencia`
+- `clima`
 
-Este notebook realiza:
+Estas entidades se cargan inicialmente en Bronze, luego son procesadas en Silver y finalmente consolidadas en Gold.
 
--   lectura de archivos CSV
--   preparación inicial de datos
--   carga hacia la base de datos
+---
 
-------------------------------------------------------------------------
+# 🥉 Esquema Bronze
 
-# 🥈 Silver Layer (Próximamente)
+La capa Bronze almacena las tablas base del proyecto:
 
-La capa **Silver** será implementada en las siguientes fases del
-proyecto.
+- `bronze.asesor`
+- `bronze.reclutamiento`
+- `bronze.rendimiento_mensual`
+- `bronze.capacitacion`
+- `bronze.calidad`
+- `bronze.incidencias`
+- `bronze.adherencia`
+- `bronze.clima`
 
-Procesos previstos:
+Aunque conceptualmente Bronze suele representar datos crudos, en este proyecto se trabajó con una versión inicial ya estructurada en PostgreSQL, lo que permitió facilitar la carga y la transición hacia las siguientes capas.
 
--   limpieza de datos
--   validación de registros
--   normalización
--   eliminación de inconsistencias
+---
 
-Estado actual:
+# ⚙️ Esquema Meta
 
-**🔄 Pendiente de implementación**
+Para el control técnico del pipeline se implementó el esquema `meta`, que contiene la tabla:
 
-------------------------------------------------------------------------
+- `meta.pipeline_config`
 
-# 🥇 Gold Layer (Próximamente)
+Esta tabla registra:
 
-La capa **Gold** contendrá datos **listos para análisis y
-visualización**.
+- el nombre de la tabla controlada
+- el tipo de carga (`H`, `F`, `I`)
+- la fecha de la última carga registrada
 
-Se implementará un **modelo dimensional** basado en tablas de hechos y
-dimensiones.
+Esto permite centralizar la lógica técnica del pipeline y dejar trazabilidad sobre las tablas procesadas.
 
-Estado actual:
+Ejemplo de configuración:
 
-**🔄 Pendiente de implementación**
+```sql
+INSERT INTO meta.pipeline_config VALUES
+('asesor', 'H', NOW()),
+('reclutamiento', 'H', NOW()),
+('rendimiento_mensual', 'H', NOW()),
+('capacitacion', 'H', NOW()),
+('calidad', 'H', NOW()),
+('incidencias', 'H', NOW()),
+('adherencia', 'H', NOW()),
+('clima', 'H', NOW());
+```
 
-------------------------------------------------------------------------
+---
 
-# 📂 Estructura del repositorio
+# 🥈 Esquema Silver
 
-    PP2B_SATDPO/
-    │
-    ├── .secrets/
-    │   ├── db_config.py
-    │   └── secrets.toml
-    │
-    ├── assets/
-    │   └── docs/
-    │
-    ├── data/
-    │   ├── 1_asesor.csv
-    │   ├── 2_reclutamiento.csv
-    │   ├── 3_rendimiento_mensual.csv
-    │   ├── 4_capacitacion.csv
-    │   ├── 5_calidad.csv
-    │   ├── 6_incidencias.csv
-    │   ├── 7_adherencia.csv
-    │   └── 8_clima.csv
-    │
-    ├── notebooks/
-    │   └── carga_bronze.ipynb
-    │
-    ├── venv_bda_idl2/
-    │
-    ├── .gitignore
-    ├── README.md
-    └── requirements.txt
+La capa Silver se implementó para contener los datos ya preparados para análisis intermedio.
 
-------------------------------------------------------------------------
+Tablas creadas:
 
-# 📊 Fuentes de datos
+- `silver.asesor`
+- `silver.reclutamiento`
+- `silver.rendimiento_mensual`
+- `silver.capacitacion`
+- `silver.calidad`
+- `silver.incidencias`
+- `silver.adherencia`
+- `silver.clima`
 
-El sistema utiliza diferentes datasets relacionados con el desempeño
-operativo.
+## Función de Silver
+- Validar estructura de datos
+- Estandarizar tipos de datos
+- Preparar la información para la capa analítica
+- Automatizar el movimiento desde Bronze mediante funciones SQL
 
-  Archivo                        Descripción
-  ------------------------------ -----------------------------------
-  dim_asesor.csv                 Información del personal
-  fact_reclutamiento.csv         Datos del proceso de contratación
-  fact_rendimiento_mensual.csv   Indicadores de desempeño
-  fact_capacitacion.csv          Registro de capacitaciones
-  fact_calidad.csv               Evaluaciones de calidad
-  fact_incidencias.csv           Registro de incidencias
-  fact_adherencia.csv            Cumplimiento de horarios
-  fact_clima.csv                 Indicadores de clima laboral
+## Procedimientos almacenados principales
+- `silver.sp_load_asesor()`
+- `silver.sp_load_reclutamiento()`
+- `silver.sp_load_rendimiento_mensual()`
+- `silver.sp_load_capacitacion()`
+- `silver.sp_load_calidad()`
+- `silver.sp_load_incidencias()`
+- `silver.sp_load_adherencia()`
+- `silver.sp_load_clima()`
 
-------------------------------------------------------------------------
+Estas funciones permiten cargar información desde Bronze hacia Silver de forma estructurada y repetible.
 
-# ⭐ Modelo dimensional (Planificado)
+---
 
-El modelo analítico utilizará un **esquema en estrella**.
+# 🥇 Esquema Gold
 
-                         dim_asesor
-                             │
-                             │
-         ┌───────────────────┼────────────────────┐
-         │                   │                    │
-     rendimiento          calidad            capacitacion
-         │
-     incidencias
-         │
-     adherencia
-         │
-       clima
+La capa Gold contiene el modelo analítico final del proyecto.
 
-Este modelo permitirá:
+## Dimensiones
+- `gold.dim_asesor`
+- `gold.dim_tiempo`
 
--   análisis de desempeño por asesor
--   análisis temporal
--   análisis de indicadores operativos
+## Hechos
+- `gold.fact_reclutamiento`
+- `gold.fact_desempeno_mensual`
 
-------------------------------------------------------------------------
+## Función del modelo Gold
+- Consolidar información operativa del asesor
+- Organizar datos para análisis dimensional
+- Facilitar consultas analíticas y generación de indicadores
+- Integrar métricas de rendimiento, calidad, adherencia, clima, capacitación e incidencias
+
+---
+
+# ⭐ Modelo dimensional
+
+El modelo analítico final sigue una lógica de esquema en estrella simplificado.
+
+```text
+                dim_asesor
+                    │
+                    │
+      ┌─────────────┴─────────────┐
+      │                           │
+fact_reclutamiento     fact_desempeno_mensual
+                                    │
+                                    │
+                               dim_tiempo
+```
+
+## Descripción
+
+### `dim_asesor`
+Contiene atributos descriptivos del asesor:
+- identificación
+- modalidad de trabajo
+- edad
+- estado civil
+- carga familiar
+- distancia a oficina
+- experiencia previa
+- nivel educativo
+- estado actual
+
+### `dim_tiempo`
+Contiene los períodos de análisis basados en `mes_gestion`.
+
+> Nota: en este proyecto, `mes_gestion` representa un período secuencial de gestión y no necesariamente un mes calendario real.
+
+### `fact_reclutamiento`
+Concentra indicadores del proceso de ingreso del asesor:
+- puntaje CV
+- score de entrevista
+- test de estrés
+- test de empatía
+- perfil de riesgo de ingreso
+
+### `fact_desempeno_mensual`
+Integra métricas mensuales como:
+- TMO promedio
+- FCR
+- NPS
+- microausentismos
+- horas no listo
+- horas de capacitación
+- nota de auditoría
+- errores críticos
+- adherencia
+- tardanzas
+- pausas
+- desconexiones
+- motivación
+- satisfacción con jefe
+- total de incidencias
+- gravedad promedio
+
+---
 
 # ⚙️ Tecnologías utilizadas
 
-  Tecnología         Uso
-  ------------------ -------------------------
-  Python             Procesamiento de datos
-  Pandas             Transformación de datos
-  Jupyter Notebook   Desarrollo del pipeline
-  Supabase           Base de datos
-  SQL                Consultas y modelado
-  GitHub             Control de versiones
+| Tecnología | Uso |
+|------------|-----|
+| Python | Procesamiento y conexión con base de datos |
+| Pandas | Lectura y manipulación de datasets |
+| Jupyter Notebook | Ejecución de carga inicial |
+| PostgreSQL | Motor de base de datos |
+| Supabase | Base de datos en la nube |
+| SQL | Creación de esquemas, tablas y funciones |
+| GitHub | Control de versiones |
+| psycopg2 | Conexión entre Python y PostgreSQL |
 
-------------------------------------------------------------------------
+---
+
+# 📂 Estructura del repositorio
+
+```text
+PP2B_SATDPO/
+│
+├── .secrets/
+│   ├── db_config.py
+│   └── secrets.toml
+│
+├── assets/
+│   └── docs/
+│
+├── data/
+│   ├── 1_asesor.csv
+│   ├── 2_reclutamiento.csv
+│   ├── 3_rendimiento_mensual.csv
+│   ├── 4_capacitacion.csv
+│   ├── 5_calidad.csv
+│   ├── 6_incidencias.csv
+│   ├── 7_adherencia.csv
+│   └── 8_clima.csv
+│
+├── notebooks/
+│   └── conexion_supabase.ipynb
+│
+├── sql/
+│   ├── bronze.sql
+│   ├── meta.sql
+│   ├── silver.sql
+│   ├── gold.sql
+│   └── procedures.sql
+│
+├── .gitignore
+├── README.md
+└── requirements.txt
+```
+
+---
+
+# 📥 Fuentes de datos
+
+El sistema utiliza datasets relacionados con el desempeño del personal operativo.
+
+| Archivo | Descripción |
+|--------|-------------|
+| `1_asesor.csv` | Información general del personal |
+| `2_reclutamiento.csv` | Datos del proceso de contratación |
+| `3_rendimiento_mensual.csv` | Indicadores mensuales de desempeño |
+| `4_capacitacion.csv` | Registro de intervenciones y capacitaciones |
+| `5_calidad.csv` | Evaluaciones de calidad del desempeño |
+| `6_incidencias.csv` | Registro de incidencias operativas |
+| `7_adherencia.csv` | Cumplimiento de horarios y pausas |
+| `8_clima.csv` | Indicadores de clima laboral |
+
+---
 
 # 🚀 Cómo ejecutar el proyecto
 
-## 1 Clonar el repositorio
+## 1. Clonar el repositorio
 
-``` bash
-git clone https://github.com/tu_usuario/PP2B_SATDPO.git
+```bash
+git clone https://github.com/steph-d989/PP2B_SATDPO.git
 cd PP2B_SATDPO
 ```
 
-------------------------------------------------------------------------
+## 2. Crear entorno virtual
 
-## 2 Crear entorno virtual
-
-``` bash
+```bash
 python -m venv venv_bda_idl2
 ```
 
-Activar entorno en Windows:
+### Activar entorno en Windows
 
-``` bash
+```bash
 venv_bda_idl2\Scripts\activate
 ```
 
-------------------------------------------------------------------------
+## 3. Instalar dependencias
 
-## 3 Instalar dependencias
-
-``` bash
+```bash
 pip install -r requirements.txt
 ```
 
-------------------------------------------------------------------------
+## 4. Configurar credenciales
+Crear o completar los archivos de configuración en `.secrets/` con los datos de conexión a Supabase/PostgreSQL.
 
-## 4 Ejecutar notebook
+Ejemplo esperado:
+- host
+- puerto
+- usuario
+- contraseña
+- nombre de base de datos
 
-Abrir:
+## 5. Ejecutar la carga inicial a Bronze
+Abrir y ejecutar el notebook:
 
-    notebooks/carga_bronza.ipynb
+```text
+notebooks/carga_bronze.ipynb
+```
 
-Este notebook ejecuta la **carga inicial de datos hacia la capa
-Bronze**.
+Este notebook realiza:
+- lectura de archivos CSV
+- preparación inicial
+- carga de datos hacia Bronze
 
-------------------------------------------------------------------------
+## 6. Crear esquemas y tablas en PostgreSQL
+Ejecutar los scripts SQL correspondientes para:
+- Bronze
+- Meta
+- Silver
+- Gold
 
-# 📈 Próximas etapas del proyecto
+## 7. Ejecutar procedimientos de carga del pipeline
 
-Las siguientes fases del proyecto incluirán:
+### Bronze → Silver
+Ejecutar las funciones de carga del esquema Silver.
 
--   Implementación de la **capa Silver**
--   Implementación de la **capa Gold**
--   Creación del **modelo dimensional**
--   Generación de **indicadores de desempeño**
--   Construcción de **dashboards analíticos**
+Ejemplo:
 
-------------------------------------------------------------------------
+```sql
+SELECT silver.sp_load_asesor();
+SELECT silver.sp_load_reclutamiento();
+```
+
+### Silver → Gold
+Ejecutar las funciones de carga del esquema Gold.
+
+Ejemplo:
+
+```sql
+SELECT gold.sp_load_dim_asesor();
+SELECT gold.sp_load_dim_tiempo();
+SELECT gold.sp_load_fact_reclutamiento();
+SELECT gold.sp_load_fact_desempeno_mensual();
+```
+
+## 8. Validar resultados
+Realizar consultas de conteo y revisión de datos en cada capa.
+
+Ejemplo:
+
+```sql
+SELECT COUNT(*) FROM silver.asesor;
+SELECT COUNT(*) FROM gold.fact_desempeno_mensual;
+```
+
+---
+
+# 🔄 Flujo del pipeline
+
+El pipeline del proyecto sigue la siguiente secuencia:
+
+1. Carga de archivos fuente
+2. Inserción inicial en Bronze
+3. Registro técnico de tablas en Meta
+4. Transformación y carga hacia Silver
+5. Consolidación analítica en Gold
+6. Consulta del modelo final
+
+---
+
+# 📌 Principales aprendizajes del proyecto
+
+- Uso de arquitectura Medallion en un entorno académico
+- Implementación de esquemas y tablas en PostgreSQL
+- Integración entre Python, SQL y Supabase
+- Automatización de cargas mediante funciones SQL
+- Modelado dimensional para análisis de desempeño
+- Organización de un pipeline de datos escalable y entendible
+
+---
+
+# 📈 Posibles mejoras futuras
+
+- Implementar cargas incrementales reales usando `meta.pipeline_config`
+- Incorporar reglas de negocio más explícitas
+- Añadir dashboards en Power BI, Tableau o Streamlit
+- Crear alertas automáticas a partir de los indicadores de Gold
+- Agregar monitoreo y auditoría de ejecuciones del pipeline
+- Documentar las dependencias entre tablas y el orden de carga
+
+---
 
 # 🎓 Contexto académico
 
@@ -269,3 +460,22 @@ Institución:
 
 **Instituto Continental**
 
+---
+
+# 👥 Autoras
+
+- **DAMIANI KAEMENA, STEPHANI**
+- **CARDENAS ACARO, CLAUDIA MILAGROS**
+
+Docente:
+- **SERGIO ORIZANO SALVADOR**
+
+---
+
+# 🔗 Repositorio
+
+GitHub del proyecto:
+
+```text
+https://github.com/steph-d989/PP2B_SATDPO.git
+```
